@@ -1,3 +1,5 @@
+import { readMetaApiError } from './meta-errors'
+
 /**
  * Meta WhatsApp Cloud API helpers.
  *
@@ -23,19 +25,8 @@ export interface MetaPhoneInfo {
   quality_rating?: string
 }
 
-interface MetaErrorResponse {
-  error?: { message?: string; code?: number; type?: string }
-}
-
 async function throwMetaError(response: Response, fallback: string): Promise<never> {
-  let message = fallback
-  try {
-    const data = (await response.json()) as MetaErrorResponse
-    if (data.error?.message) message = data.error.message
-  } catch {
-    // response body wasn't JSON — keep the fallback
-  }
-  throw new Error(message)
+  throw await readMetaApiError(response, fallback)
 }
 
 // ============================================================
